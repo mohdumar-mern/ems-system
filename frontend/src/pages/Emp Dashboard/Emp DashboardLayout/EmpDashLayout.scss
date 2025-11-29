@@ -1,0 +1,47 @@
+// DashboardLayout.scss
+
+// Variables
+
+$sidebar-bg: #2c3e50;
+$main-bg: #f8f9fa;
+$text-color: #333;
+$transition-speed: 0.3s;
+
+.employee-dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: $main-bg;
+  color: $text-color;
+  font-family: "Arial", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  text-align: left;
+  text-decoration: none;
+  text-transform: none;
+  // overflow: hidden;
+
+  main {
+    flex-grow: 1;
+    padding: 2rem;
+
+    // Container around Outlet
+    > div {
+      max-width: 1200px;
+      min-height: 100vh;
+      margin: 0 auto;
+    }
+  }
+}
+
+// Responsive: collapse sidebar on smaller screens
+@media (max-width: 768px) {
+  .employee-dashboard-layout {
+    flex-direction: column;
+
+    main {
+      padding: 1rem;
+      margin-top: 4rem;
+    }
+  }
+}

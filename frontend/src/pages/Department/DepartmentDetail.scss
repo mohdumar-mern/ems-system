@@ -1,0 +1,92 @@
+.department-detail {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .department-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    h3 {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 400;
+      word-break: break-word;
+    }
+  }
+
+  .department-info {
+    padding: 1rem 0;
+    border-top: 1px solid #e5e7eb;
+
+    p {
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      color: #374151;
+      line-height: 1.5;
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+
+      strong {
+        color: #111827;
+        min-width: 120px;
+        display: inline-block;
+      }
+    }
+  }
+
+  .department-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 2rem;
+
+    button {
+      font-size: 0.95rem;
+      padding: 0.6rem 1.2rem;
+    }
+  }
+
+  // Responsive
+  @media (max-width: 600px) {
+    padding: 1.25rem;
+
+    .department-header {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      h3 {
+        font-size: 0.9rem;
+      }
+    }
+
+    .department-info {
+      p {
+        flex-direction: column;
+
+        strong {
+          display: block;
+          margin-bottom: 0.25rem;
+        }
+      }
+    }
+  }
+}

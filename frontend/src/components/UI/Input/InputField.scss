@@ -1,0 +1,49 @@
+.input-group {
+  position: relative;
+  margin-bottom: 2rem;
+
+  input,
+  textarea {
+    width: 100%;
+    padding: 1rem 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    background: transparent;
+    resize: vertical;
+
+    &::placeholder {
+      color: transparent;
+      transition: color 0.2s ease-in-out;
+    }
+
+    &:focus::placeholder {
+      color: #999;
+    }
+
+    &:focus {
+      border-color: rgb(0, 125, 125);
+    }
+
+    &:focus + label,
+    &:not(:placeholder-shown) + label {
+      top: -12px;
+      left: 12px;
+      font-size: 0.8rem;
+      color: rgb(0, 125, 125);
+      background-color: #fff;
+      padding: 0 5px;
+    }
+  }
+
+  label {
+    position: absolute;
+    top: 1rem;
+    left: 12px;
+    font-size: 1rem;
+    color: #666;
+    pointer-events: none;
+    transition: 0.2s ease all;
+  }
+}

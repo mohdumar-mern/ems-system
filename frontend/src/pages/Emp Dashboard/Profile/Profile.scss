@@ -1,0 +1,84 @@
+// Profile.scss
+
+.profile {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    font-family: "Inter", sans-serif;
+
+    &__header {
+        text-align: center;
+        margin-bottom: 2rem;
+
+        .profile__name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .profile__email {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+    }
+
+    &__avatar {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+
+        .profile__image {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    &__details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        .profile__detail {
+            background-color: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: #374151;
+
+            strong {
+                color: #111827;
+                margin-right: 0.25rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &__actions {
+        margin-top: 2rem;
+        text-align: center;
+    }
+}
+
+/* Utility classes for loading, error, and empty states */
+.loading,
+.error,
+.empty {
+    text-align: center;
+    margin-top: 3rem;
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+.error {
+    color: #b91c1c;
+}

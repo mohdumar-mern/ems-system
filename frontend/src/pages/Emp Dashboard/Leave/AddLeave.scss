@@ -1,0 +1,50 @@
+/* src/pages/AddEmployee/AddEmployee.scss */
+
+.add-leave-page {
+  padding: 2rem;
+  background: #f5f5f5;
+  min-height: 100vh;
+
+  .status {
+    text-align: center;
+    font-size: 1.1rem;
+    &.error {
+      color: #e53e3e;
+    }
+  }
+
+  .card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+
+    &__title {
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      color: #1f2937;
+      text-align: center;
+    }
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+
+      @media (min-width: 640px) {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+   .btn--block {
+      width: 100%;
+    }
+  }
+}

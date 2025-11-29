@@ -1,0 +1,194 @@
+.employee-list {
+  padding: 2rem;
+  margin-top: 2rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+
+  .employee-header {
+    margin-bottom: 2rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .employee-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1f2937;
+      border: 2px solid transparent;
+
+      @media (min-width: 768px) {
+        border: 2px solid #1f2937;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+      }
+    }
+
+    .employee-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        .employee-actions {
+          flex-direction: row;
+          justify-content: space-between;
+        }
+       
+      }
+    }
+    .search-box{
+      width: 100%;
+      margin-top: 2rem;
+      
+    }
+  }
+
+  .employee-content {
+    .table-container {
+      background: #fff;
+      border-radius: 8px;
+      padding-bottom: 1rem;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;  /* allows horizontal scroll if needed */
+    }
+
+    .employee-table {
+      width: 100%;
+      border-spacing: 0;
+      min-width: 600px;
+
+      @media (max-width: 768px) {
+        min-width: auto;  /* removes fixed min-width on small screens for responsiveness */
+      }
+
+      thead {
+        background-color: #e5e7eb;
+
+        th {
+          text-align: left;
+          padding: 1rem;
+          font-weight: 600;
+          color: #374151;
+          border-bottom: 1px solid #d1d5db;
+          white-space: nowrap;
+        }
+      }
+
+      tbody {
+        tr {
+          transition: background 0.2s;
+
+          &:hover {
+            background-color: #f3f4f6;
+          }
+
+          td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+            white-space: nowrap;
+            vertical-align: middle;
+
+            .profile-image {
+              width: 50px;
+              height: 50px;
+              border-radius: 50%;
+              object-fit: cover;
+              margin-right: 0.5rem;
+              vertical-align: middle;
+            }
+          }
+        }
+      }
+
+      .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          transition: transform 0.2s, color 0.2s;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+
+          &:nth-child(1) {
+            color: #3b82f6;
+          }
+
+          &:nth-child(2) {
+            color: #10b981;
+          }
+
+          &:nth-child(3) {
+            color: #f29224;
+          }
+          
+          &:nth-child(4) {
+            color: #ef4444;
+          }
+        }
+      }
+
+      /* Mobile / Tablet Responsive Styling */
+      @media (max-width: 768px) {
+        thead {
+          display: none;
+        }
+
+        tr,
+        td {
+          display: block;
+          width: 100%;
+        }
+
+        tr {
+          margin-bottom: 1rem;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 1rem;
+          background-color: #fff;
+        }
+
+        td {
+          position: relative;
+          padding-right: 50%;
+          text-align: right;
+          white-space: normal;
+          border: none;
+
+          &::before {
+            content: attr(data-label);
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            width: 45%;
+            font-weight: 600;
+            color: #374151;
+            text-align: left;
+          }
+        }
+
+        .actions-cell {
+          justify-content: flex-end;
+          padding-left: 0;
+        }
+      }
+    }
+  }
+}
+
+.no-employee-message {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #6b7280;
+  margin-top: 2rem;
+}

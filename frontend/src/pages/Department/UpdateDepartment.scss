@@ -1,0 +1,42 @@
+.update-department-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f9fafb;
+
+  .update-department-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .update-department-subtitle {
+    text-align: center;
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 2rem;
+  }
+
+  .update-department-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .form-actions {
+      margin-top: 1rem;
+      text-align: center;
+    }
+  }
+
+  .status {
+    text-align: center;
+    font-size: 1rem;
+    color: #6b7280;
+
+    &.error {
+      color: #dc2626;
+    }
+  }
+}

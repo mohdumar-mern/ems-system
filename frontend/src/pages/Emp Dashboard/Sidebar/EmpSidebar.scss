@@ -1,0 +1,102 @@
+// Variables
+$sidebar-bg: #2c3e50;
+$sidebar-text: #ffffff;
+$sidebar-hover: #34495e;
+$active-bg: #1abc9c;
+$sidebar-width: 250px;
+
+$active-text: #ffffff;
+
+// Toggle button for mobile
+.sidebar-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1100;
+  background-color: $sidebar-bg;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+// Sidebar
+.sidebar {
+  width: $sidebar-width;
+  background-color: $sidebar-bg;
+  color: $sidebar-text;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  box-sizing: border-box;
+  min-height: 100vh;
+  transition: transform 0.3s ease-in-out;
+  position: relative;
+
+  .sidebar-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    color: $active-bg;
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logout {
+    margin-top: auto;
+
+    .logout-button {
+      background: transparent;
+      border: none;
+      color: #e74c3c;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.3s;
+
+      .icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover {
+        color: #c0392b;
+      }
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: $sidebar-width;
+    transform: translateX(-100%);
+    z-index: 1000;
+    margin-bottom: 0;
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-logout {
+    margin-top: 2rem;
+  }
+}

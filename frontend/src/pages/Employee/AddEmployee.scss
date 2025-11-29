@@ -1,0 +1,75 @@
+.employee-detail {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  .employee-header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h1 {
+      font-size: 2rem;
+      color: #1f2937;
+      margin-bottom: 0.25rem;
+    }
+
+    h3 {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 400;
+    }
+  }
+
+  .employee-profile {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    .employee-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #d1d5db;
+    }
+  }
+
+  .employee-info {
+    p {
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      color: #374151;
+
+      strong {
+        color: #111827;
+      }
+    }
+  }
+
+  .employee-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: start;
+  }
+
+  .error-text {
+    color: red;
+    font-weight: 500;
+  }
+
+  .no-records {
+    text-align: center;
+    font-size: 1.25rem;
+    color: #6b7280;
+  }
+
+  .loader-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3rem;
+  }
+}

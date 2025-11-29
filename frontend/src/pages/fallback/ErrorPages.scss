@@ -1,0 +1,36 @@
+/* src/pages/ErrorPages.scss */
+.error-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background-color: #f4f6f8;
+  color: #333;
+  padding: 2rem;
+}
+
+.error-page h1 {
+  font-size: 6rem;
+  margin-bottom: 1rem;
+  color: #ff4c4c;
+}
+
+.error-page p {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-link {
+  padding: 0.75rem 1.5rem;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.error-link:hover {
+  background-color: #0056b3;
+}

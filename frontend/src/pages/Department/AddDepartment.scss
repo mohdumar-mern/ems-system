@@ -1,0 +1,31 @@
+.add-department-page {
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f9fafb;
+
+  .add-department-card {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .add-department-title {
+    text-align: center;
+    font-size: 1.75rem;
+    color: #1f2937;
+    margin-bottom: 2rem;
+  }
+
+  .add-department-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    .form-actions {
+      text-align: center;
+    }
+  }
+}

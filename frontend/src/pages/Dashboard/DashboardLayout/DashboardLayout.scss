@@ -1,0 +1,48 @@
+/* DashboardLayout.scss */
+
+.dashboard-layout {
+
+  display: flex;
+ 
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 400;
+  overflow-x: hidden;
+   
+  .dash-sidebar{
+    z-index: 1100;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100vh;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+
+
+.dashboard-content {
+  flex-grow: 1;
+  padding: 2rem;
+  min-height: 100vh;
+  margin-left: 250px;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+  box-sizing: border-box;
+
+  
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    padding: 1rem;
+    overflow: visible;
+  }
+}

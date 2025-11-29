@@ -1,0 +1,152 @@
+.leave-list {
+  padding: 2rem;
+  margin-top: 2rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+
+  .leave-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .leave-title-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .leave-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+    }
+
+    .leave-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      @media (min-width: 768px) {
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+      }
+    }
+  }
+
+  .leave-content {
+    .table-wrapper {
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+      overflow-x: auto;
+    }
+
+    .leave-table {
+      width: 100%;
+      border-spacing: 0;
+      min-width: 700px;
+
+      thead {
+        background-color: #e5e7eb;
+
+        th {
+          text-align: left;
+          padding: 1rem;
+          font-weight: 600;
+          color: #374151;
+          border-bottom: 1px solid #d1d5db;
+          white-space: nowrap;
+        }
+      }
+
+      tbody {
+        tr {
+          transition: background 0.2s;
+
+          &:hover {
+            background-color: #f3f4f6;
+          }
+
+          td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+            white-space: nowrap;
+            vertical-align: middle;
+          }
+        }
+      }
+
+      .actions-cell {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      /* Mobile Responsive Table */
+      @media (max-width: 768px) {
+        thead {
+          display: none;
+        }
+
+        tbody {
+          tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: #fff;
+          }
+
+          td {
+            display: block;
+            width: 100%;
+            position: relative;
+            padding-left: 50%;
+            text-align: right;
+            border: none;
+            white-space: normal;
+
+            &::before {
+              content: attr(data-label);
+              position: absolute;
+              left: 1rem;
+              top: 0.75rem;
+              width: 45%;
+              font-weight: 600;
+              color: #374151;
+              text-align: left;
+            }
+          }
+
+          .actions-cell {
+            justify-content: flex-end;
+            padding-left: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.no-records {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #6b7280;
+  margin-top: 2rem;
+}
