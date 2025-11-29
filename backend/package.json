@@ -2,11 +2,11 @@
   "name": "employee-management-system",
   "version": "1.0.0",
   "description": "Employee Management System backend with integrated frontend",
-  "main": "app.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",

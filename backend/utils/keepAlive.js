@@ -1,7 +1,6 @@
 import axios from "axios";
 const SELF_URL = process.env.BACKEND_URL || "http://localhost:3000";
 
-console.log(SELF_URL)
 
 export const keepAlive = async () => {
 setInterval(() => {

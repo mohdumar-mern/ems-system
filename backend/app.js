@@ -14,7 +14,6 @@ import fs from "fs";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./utils/swaggerSpec.js";
 import logger from "./utils/logger.js";
-import connectDB from "./config/db.js";
 
 
 // console.log("Files in routes folder:", fs.readdirSync("./routes"));
@@ -139,29 +138,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Connect to DB & Start Server
-// connectDB(process.env.MONGO_URI)
-//   .then(() => {
-//     app.listen(PORT, "0.0.0.0", () => {
-//       console.log(`🚀 Server running at ${PORT}`);
-//       keepAlive();
-//     });
-//   })
-//   .catch((err) => {
-//     logger.error("DB Connection Failed:", err);
-//     process.exit(1);
-//   });
 
-(async () => {
-  try {
-    await connectDB(process.env.MONGO_URI);
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      // keepAlive(); // Optional: Only if you're using uptime pings
-    });
-  } catch (err) {
-    console.error('Failed to connect to database:', err.message);
-    process.exit(1);
-  }
-})();
+export default app
 
