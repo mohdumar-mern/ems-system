@@ -9,12 +9,12 @@ import express from "express";
 const router = express.Router();
 
 import {
-  addDepartment,
-  getDepartmentById,
-  deleteDepartment,
-  updateDepartment,
-  getAllDepartments,
-  getDepartmentsName,
+  addDepartmentController,
+  getDepartmentByIdController,
+  deleteDepartmentController,
+  updateDepartmentController,
+  getDepartmentsController,
+  getDepartmentsNameController,
 } from "../controllers/departmentController.js";
 
 import { protect, adminOnly } from "../middlewares/authMiddleware.js";
@@ -53,7 +53,7 @@ import { protect, adminOnly } from "../middlewares/authMiddleware.js";
  *       409:
  *         description: Department already exists
  */
-router.post("/", protect, adminOnly, addDepartment);
+router.post("/", protect, adminOnly, addDepartmentController);
 
 /**
  * @swagger
@@ -83,7 +83,7 @@ router.post("/", protect, adminOnly, addDepartment);
  *       404:
  *         description: No departments found
  */
-router.get("/", getAllDepartments);
+router.get("/", getDepartmentsController);
 
 /**
  * @swagger
@@ -97,7 +97,7 @@ router.get("/", getAllDepartments);
  *       404:
  *         description: No departments found
  */
-router.get("/dep-name", getDepartmentsName);
+router.get("/dep-name", getDepartmentsNameController);
 
 /**
  * @swagger
@@ -119,7 +119,7 @@ router.get("/dep-name", getDepartmentsName);
  *       404:
  *         description: Department not found
  */
-router.get("/:id/view", protect, adminOnly, getDepartmentById);
+router.get("/:id/view", protect, adminOnly, getDepartmentByIdController);
 
 /**
  * @swagger
@@ -156,7 +156,7 @@ router.get("/:id/view", protect, adminOnly, getDepartmentById);
  *       409:
  *         description: Duplicate department name
  */
-router.put("/:id/edit", protect, adminOnly, updateDepartment);
+router.put("/:id/edit", protect, adminOnly, updateDepartmentController);
 
 /**
  * @swagger
@@ -178,6 +178,6 @@ router.put("/:id/edit", protect, adminOnly, updateDepartment);
  *       404:
  *         description: Department not found
  */
-router.delete("/:id/delete", protect, adminOnly, deleteDepartment);
+router.delete("/:id/delete", protect, adminOnly, deleteDepartmentController);
 
 export default router;
