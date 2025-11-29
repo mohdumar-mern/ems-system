@@ -68,7 +68,7 @@ app.use(globalLimiter);
 // ✅ CORS
 const allowedOrigins = [
   "http://localhost:5173", // local dev frontend
-  "https://ems-system-swart.vercel.app", // deployed frontend
+  "https://ems-system-psi.vercel.app", // deployed frontend
   process.env.FRONTEND_URL,
 ];
 app.use(
