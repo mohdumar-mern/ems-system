@@ -1,45 +1,28 @@
 import bcrypt from "bcryptjs";
 import expressAsyncHandler from "express-async-handler";
 import User from "../models/userModel.js";
-import { generateToken } from "../utils/generateToken.js";
+import { login, register } from "../services/userServices.js";
 
+
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+};
 // 🔐 Register new user
-export const register = expressAsyncHandler(async (req, res) => {
+export const registerController = expressAsyncHandler(async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, error: "All fields are required" });
-    }
+    const {accessToken, refreshToken, user} = register({ name, email, password, role });
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+    res.status(201).json({ success: true, user, accessToken });
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: "Email already in use" });
-    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
-      name: name.trim(),
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      role: role || "employee",
-    });
-
-    const savedUser = await user.save();
-    const token = generateToken(savedUser._id);
-
-    res.status(201).json({
-      message: "User registered successfully",
-      success: true,
-      token,
-      user: {
-        id: savedUser._id,
-        name: savedUser.name,
-        email: savedUser.email,
-        role: savedUser.role,
-      },
-    });
   } catch (error) {
     console.error("Register Error:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -47,34 +30,14 @@ export const register = expressAsyncHandler(async (req, res) => {
 });
 
 // 🔓 Login user
-export const login = expressAsyncHandler(async (req, res) => {
+export const loginController = expressAsyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
+    const { user, refreshToken, accessToken } = await login({ email, password });
+    res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+    res.status(200).json({ success: true, user, accessToken });
+   
 
-    if (!email || !password)
-      return res.status(400).json({ success: false, error: "Email and password required" });
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-
-    const passwordMatch = user && await bcrypt.compare(password, user.password);
-
-    if (!user || !passwordMatch) {
-      return res.status(400).json({ success: false, error: "Invalid email or password" });
-    }
-
-    const token = generateToken(user._id);
-
-    res.status(200).json({
-      message: "Login successful",
-      success: true,
-      token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });

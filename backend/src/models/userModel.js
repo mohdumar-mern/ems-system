@@ -23,6 +23,10 @@ const userSchema = mongoose.Schema(
       enum: ["admin", "employee", "manager"],
       default: "employee",
     },
+    refreshToken: {
+      type: String,
+      default: null,
+    },
     profile: {
       url: {
         type: String,

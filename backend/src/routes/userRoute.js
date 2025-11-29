@@ -1,7 +1,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { forgotPassword, login, logout, register } from '../controllers/userController.js';
+import { forgotPassword, loginController, logout, registerController } from '../controllers/userController.js';
 import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter.js';
 
 /**
@@ -43,7 +43,7 @@ import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter.js';
  *       400:
  *         description: Email already in use
  */
-router.post("/register",registerLimiter, register);
+router.post("/register",registerLimiter, registerController);
 
 /**
  * @swagger
@@ -71,7 +71,7 @@ router.post("/register",registerLimiter, register);
  *       400:
  *         description: Invalid credentials
  */
-router.post("/login",loginLimiter,login);
+router.post("/login",loginLimiter,loginController);
 
 /**
  * @swagger
