@@ -3,9 +3,9 @@ const router = express.Router();
 
 import { protect } from '../middlewares/authMiddleware.js';
 import {
-  addSalary,
-  getSalary,
-  getSalaryByEmpId,
+  addSalaryController,
+  getSalaryController,
+  getSalaryByEmpIdController,
 } from '../controllers/salaryController.js';
 
 /**
@@ -36,7 +36,7 @@ import {
  *       200:
  *         description: List of salaries
  */
-router.get('/', protect, getSalary);
+router.get('/', protect, getSalaryController);
 
 /**
  * @swagger
@@ -57,7 +57,7 @@ router.get('/', protect, getSalary);
  *       200:
  *         description: Salary records for the employee
  */
-router.get('/:empId/history', protect, getSalaryByEmpId);
+router.get('/:empId/history', protect, getSalaryByEmpIdController);
 
 /**
  * @swagger
@@ -93,6 +93,6 @@ router.get('/:empId/history', protect, getSalaryByEmpId);
  *       201:
  *         description: Salary added successfully
  */
-router.post('/add', protect, addSalary);
+router.post('/add', protect, addSalaryController);
 
 export default router;
