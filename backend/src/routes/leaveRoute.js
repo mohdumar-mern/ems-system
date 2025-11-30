@@ -3,12 +3,12 @@ const router = express.Router();
 
 import { adminOnly, protect } from "../middlewares/authMiddleware.js";
 import {
-  addLeave,
-  getEmployeeLeaves,
-  getEmployeesLeavesAdmin,
-  getSingleLeaveById,
-  getEmployeeLeavesByEmpId,
-  updateLeaveStatus,
+  addLeaveController,
+  getEmployeeLeavesController,
+  getEmployeesLeavesAdminController,
+  getSingleLeaveByIdController,
+  getEmployeeLeavesByEmpIdController,
+  updateLeaveStatusController,
 } from "../controllers/leaveController.js";
 
 /**
@@ -55,7 +55,7 @@ import {
  *       400:
  *         description: Invalid input or employee not found
  */
-router.post("/add", protect, addLeave);
+router.post("/add", protect, addLeaveController);
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.post("/add", protect, addLeave);
  *       404:
  *         description: No leaves found
  */
-router.get("/", protect, adminOnly, getEmployeesLeavesAdmin);
+router.get("/", protect, adminOnly, getEmployeesLeavesAdminController);
 
 /**
  * @swagger
@@ -106,7 +106,7 @@ router.get("/", protect, adminOnly, getEmployeesLeavesAdmin);
  *       404:
  *         description: Leave not found
  */
-router.get("/:id/view", protect, adminOnly, getSingleLeaveById);
+router.get("/:id/view", protect, adminOnly, getSingleLeaveByIdController);
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.get("/:id/view", protect, adminOnly, getSingleLeaveById);
  *       404:
  *         description: No leaves found
  */
-router.get("/:id/leaves", protect, adminOnly, getEmployeeLeavesByEmpId);
+router.get("/:id/leaves", protect, adminOnly, getEmployeeLeavesByEmpIdController);
 
 /**
  * @swagger
@@ -165,7 +165,7 @@ router.get("/:id/leaves", protect, adminOnly, getEmployeeLeavesByEmpId);
  *       404:
  *         description: Leave not found
  */
-router.put("/:id/update-status", protect, adminOnly, updateLeaveStatus);
+router.put("/:id/update-status", protect, adminOnly, updateLeaveStatusController);
 
 /**
  * @swagger
@@ -188,6 +188,6 @@ router.put("/:id/update-status", protect, adminOnly, updateLeaveStatus);
  *       404:
  *         description: Employee not found
  */
-router.get("/:id/employee", protect, getEmployeeLeaves);
+router.get("/:id/employee", protect, getEmployeeLeavesController);
 
 export default router;

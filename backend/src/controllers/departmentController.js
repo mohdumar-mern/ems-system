@@ -68,7 +68,8 @@ export const deleteDepartmentController = expressAsyncHandler(async (req, res) =
 
 // ✅ Get All Department Names and IDs
 export const getDepartmentsNameController = expressAsyncHandler(async (req, res) => {
-  const department = getDepartmentsName();
+  const departments = await getDepartmentsName();
+
   res.status(200).json({
     success: true,
     message: "Departments fetched successfully",
