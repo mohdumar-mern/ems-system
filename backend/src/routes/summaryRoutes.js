@@ -3,7 +3,7 @@ import express from "express";
 const router = express.Router();
 
 import { adminOnly, protect } from "../middlewares/authMiddleware.js";
-import { getEmpSummary, getSummary } from "../controllers/summaryController.js";
+import { getEmpSummaryController, getSummaryController } from "../controllers/summaryController.js";
 
 /**
  * @swagger
@@ -21,7 +21,7 @@ import { getEmpSummary, getSummary } from "../controllers/summaryController.js";
  *       403:
  *         description: Forbidden - Admin only
  */
-router.get("/summary", protect, adminOnly, getSummary);
+router.get("/summary", protect, adminOnly, getSummaryController);
 
 /**
  * @swagger
@@ -46,6 +46,6 @@ router.get("/summary", protect, adminOnly, getSummary);
  *       404:
  *         description: Employee not found
  */
-router.get("/:id/summary", protect, getEmpSummary);
+router.get("/:id/summary", protect, getEmpSummaryController);
 
 export default router;
