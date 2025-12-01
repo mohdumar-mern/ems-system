@@ -2,12 +2,12 @@ import express from "express";
 const router = express.Router();
 
 import {
-  addEmployeeController,
-  getEmployeeController,
-  getEmployeeByIdController,
-  updateEmployeeController,
-  getEmployeeByDepartmentIdController,
-  deleteEmployeeController
+  addEmployee,
+  getEmployee,
+  getEmployeeById,
+  updateEmployee,
+  getEmployeeByDepartmentId,
+  deleteEmployee
 } from "../controllers/employeeController.js";
 
 import { protect, adminOnly } from "../middlewares/authMiddleware.js";
@@ -50,7 +50,7 @@ import { upload } from "../middlewares/multerMiddleware.js";
  *       404:
  *         description: No employees found
  */
-router.get("/", protect, getEmployeeController);
+router.get("/", protect, getEmployee);
 
 /**
  * @swagger
@@ -107,8 +107,8 @@ router.get("/", protect, getEmployeeController);
  *       400:
  *         description: Invalid input
  */
-// router.post("/", protect, adminOnly, upload.single("profile"), addEmployeeController);
-router.post("/", protect, adminOnly, addEmployeeController);
+// router.post("/", protect, adminOnly, upload.single("profile"), addEmployee);
+router.post("/", protect, adminOnly, addEmployee);
 
 /**
  * @swagger
@@ -131,7 +131,7 @@ router.post("/", protect, adminOnly, addEmployeeController);
  *       404:
  *         description: Employee not found
  */
-router.get("/:id/view", protect, getEmployeeByIdController);
+router.get("/:id/view", protect, getEmployeeById);
 
 /**
  * @swagger
@@ -154,7 +154,7 @@ router.get("/:id/view", protect, getEmployeeByIdController);
  *       404:
  *         description: Department not found or no employees
  */
-router.get("/department/:id", protect, getEmployeeByDepartmentIdController);
+router.get("/department/:id", protect, getEmployeeByDepartmentId);
 
 /**
  * @swagger
@@ -196,7 +196,7 @@ router.get("/department/:id", protect, getEmployeeByDepartmentIdController);
  *       404:
  *         description: Employee not found
  */
-router.put("/:id/edit", protect, updateEmployeeController);
+router.put("/:id/edit", protect, updateEmployee);
 
 /**
  * @swagger
@@ -219,6 +219,6 @@ router.put("/:id/edit", protect, updateEmployeeController);
  *       404:
  *         description: Employee not found
  */
-router.delete("/:id/delete", protect, adminOnly, deleteEmployeeController);
+router.delete("/:id/delete", protect, adminOnly, deleteEmployee);
 
 export default router;

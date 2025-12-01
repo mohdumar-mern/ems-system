@@ -1,54 +1,49 @@
 import expressAsyncHandler from "express-async-handler";
 
-import { addEmployee, deleteEmployee, getEmployee, getEmployeeByDepartmentId, getEmployeeById, updateEmployee } from "../services/employeeServices.js";
+import { addEmployeeService, deleteEmployeeService, getEmployeeService, getEmployeeByDepartmentIdService, getEmployeeByIdService, updateEmployeeService } from "../services/employeeServices.js";
 import ApiResponse from "../utils/apiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
 
 // ➕ Add new employee
-export const addEmployeeController = expressAsyncHandler(async (req, res, next) => {
-  try {
-    const {
-      name,
-      email,
-      password,
-      dob,
-      gender,
-      maritalStatus,
-      designation,
-      department,
-      salary,
-      role = "employee",
-    } = req.body;
+export const addEmployee = expressAsyncHandler(async (req, res) => {
+  
+  const {
+    name,
+    email,
+    password,
+    dob,
+    gender,
+    maritalStatus,
+    designation,
+    department,
+    salary,
+    role = "employee",
+  } = req.body;
 
-    const employee = await addEmployee({
-      name,
-      email,
-      password,
-      dob,
-      gender,
-      maritalStatus,
-      designation,
-      department,
-      salary,
-      role,
-      created_by: req.user._id,
-    });
+  const employee = await addEmployeeService({
+    name,
+    email,
+    password,
+    dob,
+    gender,
+    maritalStatus,
+    designation,
+    department,
+    salary,
+    role,
+    created_by: req.user._id,
+  });
 
-    // if (!req.file?.path && !req.file?.url) {
-    //   return res.status(400).json({ success: false, error: "No profile image uploaded" });
-    // }
-    res.status(201).json({
-      success: true,
-      message: "Employee created successfully",
-      employee,
-    });
-  } catch (error) {
-    next(error); // Pass error to express-async-handler/global error handler
-  }
+  res.status(201).json({
+    success: true,
+    message: "Employee created successfully",
+    employee,
+  });
 });
 
+
 // 📄 Get all employees
-export const getEmployeeController = catchAsync(async (req, res) => {
+export const getEmployee = catchAsync(async (req, res) => {
   const { page = 1, limit = 6, search = "" } = req.query;
 
   const options = {
@@ -78,8 +73,7 @@ export const getEmployeeController = catchAsync(async (req, res) => {
     ];
   }
 
-  const employees = await getEmployee({ query, options });
-  console.log("employee", employees)
+  const employees = await getEmployeeService({ query, options });
 
 
   return res
@@ -89,39 +83,26 @@ export const getEmployeeController = catchAsync(async (req, res) => {
 
 
 // 🔍 Get employee by ID
-export const getEmployeeByIdController = expressAsyncHandler(async (req, res) => {
-  const employee = await getEmployeeById(req.params.id);
+export const getEmployeeById = expressAsyncHandler(async (req, res) => {
+  const employee = await getEmployeeByIdService(req.params.id);
 
-  res.status(200).json({
-    success: true,
-    message: "Employee fetched successfully",
-    employee,
-  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, employee, "Employees fetched successfully"));
 });
 
 // ✏️ Update employee
-export const updateEmployeeController = expressAsyncHandler(async (req, res) => {
-  const { name, maritalStatus, designation, department, salary, role } = req.body;
-  const { id } = req.params;
-  const updatedEmployee = await updateEmployee(id, {
-    name,
-    maritalStatus,
-    designation,
-    department,
-    salary,
-    role,
-  });
+export const updateEmployee = expressAsyncHandler(async (req, res) => {
+  const updatedEmployee = await updateEmployeeService(req.params.id, req.body);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedEmployee, "Employee updated successfully"));
 
-  res.status(200).json({
-    success: true,
-    message: "Employee updated successfully",
-    employee: updatedEmployee,
-  });
 });
 
 // 🏢 Get Employees by Department
-export const getEmployeeByDepartmentIdController = expressAsyncHandler(async (req, res) => {
-  const employees = await getEmployeeByDepartmentId(req.params.id);
+export const getEmployeeByDepartmentId = expressAsyncHandler(async (req, res) => {
+  const employees = await getEmployeeByDepartmentIdService(req.params.id);
   res.status(200).json({
     success: true,
     message: "Employees fetched successfully",
@@ -130,13 +111,8 @@ export const getEmployeeByDepartmentIdController = expressAsyncHandler(async (re
   });
 });
 
-// 🗑️ Delete employee
-export const deleteEmployeeController = expressAsyncHandler(async (req, res) => {
-
-  const { success, message } = await deleteEmployee(req.params.id);
-
-  res.status(200).json({
-    success: success,
-    message: message,
-  });
+// 🗑Delete employee
+export const deleteEmployee = expressAsyncHandler(async (req, res) => {
+  const { message } = await deleteEmployeeService(req.params.id);
+  res.status(200).json(new ApiResponse(200, {}, message));
 });

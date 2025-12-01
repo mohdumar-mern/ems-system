@@ -3,11 +3,11 @@ import Department from "../models/departmentModel.js";
 import Employee from "../models/employeeModel.js";
 import User from "../models/userModel.js";
 import { v4 as uuidv4 } from "uuid";
-import { getEmployees } from "../repositories/employeeRepo.js";
+import { employeeRepository } from "../repositories/employeeRepo.js";
 import ApiError from "../utils/ApiError.js";
 
 
-const addEmployee = async ({
+const addEmployeeService = async ({
   name,
   email,
   password,
@@ -21,37 +21,37 @@ const addEmployee = async ({
   created_by
 }) => {
 
-  const [existingUser, departmentDoc] = await Promise.all([
-    User.findOne({ email }),
-    Department.findOne({ dep_name: department }),
-  ]);
-
+  // Check if user exists
+  const existingUser = await employeeRepository.findUserByEmail(email);
   if (existingUser) {
-    throw new Error("Email already in use");
-    //   return res.status(400).json({ success: false, error: "Email already in use" });
+    throw new ApiError(400, "Email already in use");
   }
 
+  // Check department
+  const departmentDoc = await employeeRepository.findDepartmentByName(department);
   if (!departmentDoc) {
-    throw new Error(`Department '${department}' not found`);
-    //   return res.status(400).json({ success: false, error: `Department '${department}' not found` });
+    throw new ApiError(400, `Department '${department}' not found`);
   }
 
+  // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
-  // const fileUrl = req.file.path || req.file.url;
-  // const public_id = req.file.public_id || req.file.filename || null;
 
-  const user = await new User({
+  // Create user
+  const user = await employeeRepository.createUser({
     name,
     email,
     password: hashedPassword,
     role,
-    //   profile: { url: fileUrl, public_id },
-  }).save();
+  });
 
+  // Generate employee ID
   const empId = `${user.name.replace(/\s+/g, "")}-${uuidv4().split("-")[0]}`;
+
+  // Convert dob
   const dobDate = dob ? new Date(dob) : null;
 
-  const employee = await new Employee({
+  // Create employee
+  const employee = await employeeRepository.createEmployee({
     userId: user._id,
     emp_name: user.name,
     empId,
@@ -62,14 +62,14 @@ const addEmployee = async ({
     department: departmentDoc._id,
     salary,
     created_by,
-  }).save();
+  });
 
   return employee;
-}
+};
 
-const getEmployee = async ({ query, options }) => {
-  const employees = await getEmployees(query, options);
-  console.log("employee", employees)
+
+const getEmployeeService = async ({ query, options }) => {
+  const employees = await employeeRepository.Services(query, options);
 
   if (!employees?.data?.length) {
     throw new ApiError(404, "No employees found");
@@ -79,106 +79,116 @@ const getEmployee = async ({ query, options }) => {
 };
 
 
-const getEmployeeById = async (id) => {
-  const employee = await Employee.findById(id)
-    .populate("userId", "_id name email profile role")
-    .populate("department", "_id dep_name");
+const getEmployeeByIdService = async (id) => {
+  // First, find employee by _id
+  let employee = await employeeRepository.findByIdWithRelations(id);
 
+  // If not found, try userId
   if (!employee) {
-    employee = await Employee.findOne({ userId: id })
-      .populate("userId", "_id name email profile role")
-      .populate("department", "_id dep_name");
+    employee = await employeeRepository.findByUserId(id);
   }
 
+  //  If still not found, throw custom error
   if (!employee) {
-    return res.status(404).json({ success: false, message: "Employee not found" });
+    throw new ApiError(404, "Employee not found");
   }
+
   return employee;
 
 
 }
+const updateEmployeeService = async (id, data) => {
+  const { name, maritalStatus, designation, department, salary, role } = data;
 
-const updateEmployee = async (id, {
-  name, maritalStatus, designation, department, salary, role
-}) => {
-  const employee = await Employee.findById(id);
-  if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
+  // 1️⃣ Get employee
+  const employee = await employeeRepository.findById(id);
+  if (!employee) throw new ApiError(404, "Employee not found");
 
-  const user = await User.findById(employee.userId);
-  if (!user) return res.status(404).json({ success: false, message: "Associated user not found" });
+  // 2️⃣ Get associated User
+  const user = await employeeRepository.findUser(employee.userId);
+  if (!user) throw new ApiError(404, "Associated user not found");
 
+  // 3️⃣ Update User
   user.name = name || user.name;
   user.role = role || user.role;
   await user.save();
 
+  // 4️⃣ Generate employee ID
   const empId = `${user.name.replace(/\s+/g, "")}-${uuidv4().split("-")[0]}`;
 
-  let deptId = department;
+  // 5️⃣ Department update logic
+  let departmentId = department;
+
   if (department && isNaN(department)) {
-    const deptDoc = await Department.findOne({ dep_name: department });
-    if (!deptDoc) {
-      return res.status(400).json({ success: false, message: `Department '${department}' not found` });
+    const dept = await employeeRepository.findDepartmentByName(department);
+    if (!dept) {
+      throw new ApiError(400, `Department '${department}' not found`);
     }
-    deptId = deptDoc._id;
+    departmentId = dept._id;
   }
-  const updatedEmployee = await Employee.findByIdAndUpdate(
-    id,
-    {
-      emp_name: user.name,
-      empId,
-      maritalStatus: maritalStatus || employee.maritalStatus,
-      designation: designation || employee.designation,
-      department: deptId || employee.department,
-      salary: salary || employee.salary,
-    },
-    { new: true, runValidators: true }
-  );
+
+  // 6️⃣ Update employee fields
+  const updatedEmployee = await employeeRepository.updateEmployee(id, {
+    emp_name: user.name,
+    empId,
+    maritalStatus: maritalStatus || employee.maritalStatus,
+    designation: designation || employee.designation,
+    department: departmentId || employee.department,
+    salary: salary || employee.salary,
+  });
+
   return updatedEmployee;
+};
 
-}
 
-const getEmployeeByDepartmentId = async (departmentId) => {
+const getEmployeeByDepartmentIdService = async (departmentId) => {
 
-  const exists = await Department.exists({ _id: departmentId });
+  const exists = await employeeRepository.departmentExists({ _id: departmentId });
   if (!exists) {
-    return res.status(404).json({ success: false, message: "Department not found" });
+    throw new ApiError(404, "Department not found");
   }
 
-  const employees = await Employee.find({ department: departmentId }).select("emp_name empId");
+  const employees = await employeeRepository.findEmployeesByDepartment(departmentId);
   if (!employees.length) {
-    return res.status(404).json({ success: false, message: "No employees found for this department" });
+    throw new ApiError(404, "No employees found in this department");
   }
   return employees;
 }
 
-const deleteEmployee = async (id) => {
-  const employee = await Employee.findById(id);
+const deleteEmployeeService = async (id) => {
+
+  const employee = await employeeRepository.findById(id);
+
   if (!employee) {
-    return res.status(404).json({ success: false, message: "Employee not found" });
+    throw new ApiError(404, "Employee not found");
   }
 
+  // Delete user + employee
   await Promise.all([
-    User.findByIdAndDelete(employee.userId),
-    Employee.findByIdAndDelete(id),
+    employeeRepository.deleteUser(employee.userId),
+    employeeRepository.deleteEmployee(id),
   ]);
 
-  const remaining = await Employee.find({ department: employee.department });
-  if (remaining.length === 0) {
-    await Department.findByIdAndDelete(employee.department);
-  }
-  return {
-    success: true,
-    message: "Employee and associated user deleted successfully"
-  };
+  const remaining = await employeeRepository.findEmployeesByDepartment(
+    employee.department
+  );
 
-}
+  if (remaining.length === 0) {
+    await employeeRepository.deleteDepartment(employee.department);
+  }
+
+  return {
+    message: "Employee and associated user deleted successfully",
+  };
+};
+
 
 export {
-  addEmployee,
-  getEmployee,
-  getEmployeeById,
-  updateEmployee,
-  getEmployeeByDepartmentId,
-  deleteEmployee
+  addEmployeeService,
+  getEmployeeService,
+  getEmployeeByIdService,
+  updateEmployeeService,
+  getEmployeeByDepartmentIdService,
+  deleteEmployeeService
 
 };
