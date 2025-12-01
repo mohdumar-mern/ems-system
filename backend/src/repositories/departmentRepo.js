@@ -1,50 +1,61 @@
+import mongoose from "mongoose";
 import Department from "../models/departmentModel.js";
 
+const { isValidObjectId } = mongoose;
+
 export const departmentRepository = {
+  // 🔍 Find by ID (with creator)
+  async findByIdWithCreator(id) {
+    if (!isValidObjectId(id)) return null;
 
-    /* ----------------------------------------------------
- * 👤 Department METHODS
- * ---------------------------------------------------- */
-    // Find department by ID with user populated
-    async findByIdWithCreator(id) {
-        return Department.findOne({
-            _id: id,
-            is_deleted: false,
-        })
-            .populate("created_by", "name email")
-            .lean();
-    },
+    return Department.findOne({ _id: id, is_deleted: false })
+      .populate("created_by", "_id name email")
+      .lean();
+  },
 
+  // 🔍 Find by ID (editable document)
+  async findById(id) {
+    if (!isValidObjectId(id)) return null;
+    return Department.findOne({ _id: id, is_deleted: false });
+  },
 
-    async findById(id) {
-        return Department.findById(id);
-    },
-    // Pagination + Filtering
-    async getDepartments(query = {}, options = {}) {
-        return Department.paginate(query, options);
-    },
-    // fid one department by dep_name
-    async findByName(dep_name) {
-        return Department.findOne({ dep_name: dep_name.trim() });
-    },
-    // Create Department
-    async create(departmentData) {
-        return Department.create(departmentData);
-    },
-    async getNames() {
-        return Department.find({ is_deleted: false })
-            .select("_id dep_name")
-            .sort({ dep_name: 1 })
-            .lean();
-    },
-    // Soft delete
-    async softDelete(id, userId) {
-        return Department.findByIdAndUpdate(
-            id,
-            { is_deleted: true, updated_by: userId },
-            { new: true }
-        );
-    },
+  // 📄 Paginated List
+  async getDepartments(query, options) {
+    return Department.paginate(query, {
+      ...options,
+      populate: {
+        path: "created_by",
+        select: "_id name email",
+      }
+    });
+  },
 
+  // 🔎 Find by name (trim done by model)
+  async findByName(dep_name) {
+    return Department.findOne({
+      dep_name,
+      is_deleted: false
+    }).lean();
+  },
 
-}
+  // ➕ Create
+  async create(data) {
+    return Department.create(data);
+  },
+
+  // 📌 Simple Name List
+  async getNames() {
+    return Department.find({ is_deleted: false })
+      .select("_id dep_name")
+      .lean();
+  },
+
+  // 🗑 Soft Delete
+  async softDelete(id, userId) {
+    return Department.findByIdAndUpdate(
+      id,
+      { is_deleted: true, updated_by: userId },
+      { new: true }
+    );
+  }
+};
