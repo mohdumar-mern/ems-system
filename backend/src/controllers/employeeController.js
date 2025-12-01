@@ -1,12 +1,19 @@
-import expressAsyncHandler from "express-async-handler";
+import {
+  addEmployeeService,
+  deleteEmployeeService,
+  getEmployeeService,
+  getEmployeeByDepartmentIdService,
+  getEmployeeByIdService,
+  updateEmployeeService
+} from "../services/employeeServices.js";
 
-import { addEmployeeService, deleteEmployeeService, getEmployeeService, getEmployeeByDepartmentIdService, getEmployeeByIdService, updateEmployeeService } from "../services/employeeServices.js";
 import ApiResponse from "../utils/apiResponse.js";
 import catchAsync from "../utils/catchAsync.js";
 
-// ➕ Add new employee
-export const addEmployee = expressAsyncHandler(async (req, res) => {
-  
+/* ===========================================================
+    ➕ ADD EMPLOYEE
+=========================================================== */
+export const addEmployee = catchAsync(async (req, res) => {
   const {
     name,
     email,
@@ -34,15 +41,14 @@ export const addEmployee = expressAsyncHandler(async (req, res) => {
     created_by: req.user._id,
   });
 
-  res.status(201).json({
-    success: true,
-    message: "Employee created successfully",
-    employee,
-  });
+  return res.status(201).json(
+    new ApiResponse(201, employee, "Employee created successfully")
+  );
 });
 
-
-// 📄 Get all employees
+/* ===========================================================
+    📄 GET ALL EMPLOYEES (Pagination + Filtering)
+=========================================================== */
 export const getEmployee = catchAsync(async (req, res) => {
   const { page = 1, limit = 6, search = "" } = req.query;
 
@@ -62,7 +68,6 @@ export const getEmployee = catchAsync(async (req, res) => {
 
   if (search.trim()) {
     const regex = new RegExp(search.trim(), "i");
-
     query.$or = [
       { emp_name: regex },
       { empId: regex },
@@ -75,35 +80,40 @@ export const getEmployee = catchAsync(async (req, res) => {
 
   const employees = await getEmployeeService({ query, options });
 
-
   return res
     .status(200)
     .json(new ApiResponse(200, employees, "Employees fetched successfully"));
 });
 
-
-// 🔍 Get employee by ID
-export const getEmployeeById = expressAsyncHandler(async (req, res) => {
+/* ===========================================================
+    🔍 GET EMPLOYEE BY ID OR userId
+=========================================================== */
+export const getEmployeeById = catchAsync(async (req, res) => {
   const employee = await getEmployeeByIdService(req.params.id);
 
   return res
     .status(200)
-    .json(new ApiResponse(200, employee, "Employees fetched successfully"));
+    .json(new ApiResponse(200, employee, "Employee fetched successfully"));
 });
 
-// ✏️ Update employee
-export const updateEmployee = expressAsyncHandler(async (req, res) => {
+/* ===========================================================
+    ✏️ UPDATE EMPLOYEE
+=========================================================== */
+export const updateEmployee = catchAsync(async (req, res) => {
   const updatedEmployee = await updateEmployeeService(req.params.id, req.body);
+
   return res
     .status(200)
     .json(new ApiResponse(200, updatedEmployee, "Employee updated successfully"));
-
 });
 
-// 🏢 Get Employees by Department
-export const getEmployeeByDepartmentId = expressAsyncHandler(async (req, res) => {
+/* ===========================================================
+    🏢 GET EMPLOYEES BY DEPARTMENT ID
+=========================================================== */
+export const getEmployeeByDepartmentId = catchAsync(async (req, res) => {
   const employees = await getEmployeeByDepartmentIdService(req.params.id);
-  res.status(200).json({
+
+  return res.status(200).json({
     success: true,
     message: "Employees fetched successfully",
     totalEmployeesDepartment: employees.length,
@@ -111,8 +121,11 @@ export const getEmployeeByDepartmentId = expressAsyncHandler(async (req, res) =>
   });
 });
 
-// 🗑Delete employee
-export const deleteEmployee = expressAsyncHandler(async (req, res) => {
+/* ===========================================================
+    🗑 DELETE EMPLOYEE (with user + auto dep delete)
+=========================================================== */
+export const deleteEmployee = catchAsync(async (req, res) => {
   const { message } = await deleteEmployeeService(req.params.id);
-  res.status(200).json(new ApiResponse(200, {}, message));
+
+  return res.status(200).json(new ApiResponse(200, {}, message));
 });
