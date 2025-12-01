@@ -7,16 +7,15 @@ export const employeeRepository = {
    * 🔍 USER METHODS
    * ---------------------------------------------------- */
   async findUserByEmail(email) {
-    return User.findOne({ email });
+    return User.findOne({ email }).lean();
   },
 
   async findUser(userId) {
-    return User.findById(userId);
+    return User.findById(userId).lean();
   },
 
   async createUser(data) {
-    const user = new User(data);
-    return user.save();
+    return User.create(data); // create + save in one step
   },
 
   async deleteUser(id) {
@@ -27,15 +26,15 @@ export const employeeRepository = {
    * 🔍 DEPARTMENT METHODS
    * ---------------------------------------------------- */
   async findDepartmentByName(name) {
-    return Department.findOne({ dep_name: name });
+    return Department.findOne({ dep_name: name.trim(), is_deleted: false }).lean();
   },
 
   async findDepartmentById(id) {
-    return Department.findById(id);
+    return Department.findById(id).lean();
   },
 
   async departmentExists(id) {
-    return Department.exists({ _id: id });
+    return Department.exists({ _id: id, is_deleted: false });
   },
 
   async deleteDepartment(id) {
@@ -43,9 +42,11 @@ export const employeeRepository = {
   },
 
   async findEmployeesByDepartment(id) {
-    return Employee.find({ department: id }).select("emp_name empId");
+    return Employee.find({ department: id, is_deleted: false })
+      .select("emp_name empId")
+      .lean();
   },
-  // Delete all employees of department
+
   async deleteManyByDepartment(deptId) {
     return Employee.deleteMany({ department: deptId });
   },
@@ -53,30 +54,39 @@ export const employeeRepository = {
   /* ----------------------------------------------------
    * 👤 EMPLOYEE METHODS
    * ---------------------------------------------------- */
-
-  // Pagination + Filtering
   async getEmployees(query = {}, options = {}) {
-    return Employee.paginate(query, options);
+    query.is_deleted = false; // only active employees
+    return Employee.paginate(query, {
+      ...options,
+      lean: true,
+      sort: options.sort || { createdAt: -1 },
+      populate: [
+        { path: "userId", select: "_id name email profile role" },
+        { path: "department", select: "_id dep_name" },
+      { path: "created_by", select: "_id name email" },
+
+      ],
+    });
   },
 
   async createEmployee(data) {
-    const employee = new Employee(data);
-    return employee.save();
+    return Employee.create(data); // automatically trims via pre-save
   },
 
   async findById(id) {
-    return Employee.findById(id);
+    return Employee.findActiveById(id); // uses static helper
   },
 
-  async findByUserId(id) {
-    return Employee.findOne({ userId: id });
+  async findByUserId(userId) {
+    return Employee.findOne({ userId, is_deleted: false }).lean();
   },
 
   async updateEmployee(id, updateData) {
-    return Employee.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    return Employee.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
   },
 
   async deleteEmployee(id) {
@@ -86,17 +96,14 @@ export const employeeRepository = {
   /* ----------------------------------------------------
    * 👀 POPULATED EMPLOYEE (Relations)
    * ---------------------------------------------------- */
-
   async findByIdWithRelations(id) {
-    return Employee.findById(id)
-      .populate("userId", "_id name email profile role")
-      .populate("department", "_id dep_name");
+    return Employee.findActiveById(id); // already populates user & department
   },
 
-  async findByUserIdWithRelations(id) {
-    return Employee.findOne({ userId: id })
+  async findByUserIdWithRelations(userId) {
+    return Employee.findOne({ userId, is_deleted: false })
       .populate("userId", "_id name email profile role")
-      .populate("department", "_id dep_name");
+      .populate("department", "_id dep_name")
+      .lean();
   },
-
 };

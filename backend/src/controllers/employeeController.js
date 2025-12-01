@@ -56,12 +56,7 @@ export const getEmployee = catchAsync(async (req, res) => {
     page: Number(page),
     limit: Number(limit),
     lean: true,
-    populate: [
-      { path: "userId", select: "_id name email profile" },
-      { path: "department", select: "_id dep_name" },
-      { path: "created_by", select: "_id name email" },
-    ],
-    sort: { createdAt: -1 },
+    sort: { createdAt: -1 }
   };
 
   const query = {};
@@ -72,7 +67,6 @@ export const getEmployee = catchAsync(async (req, res) => {
       { emp_name: regex },
       { empId: regex },
       { designation: regex },
-      { salary: regex },
       { gender: regex },
       { maritalStatus: regex },
     ];
@@ -86,7 +80,7 @@ export const getEmployee = catchAsync(async (req, res) => {
 });
 
 /* ===========================================================
-    🔍 GET EMPLOYEE BY ID OR userId
+    🔍 GET EMPLOYEE BY ID OR USER ID
 =========================================================== */
 export const getEmployeeById = catchAsync(async (req, res) => {
   const employee = await getEmployeeByIdService(req.params.id);
@@ -116,13 +110,13 @@ export const getEmployeeByDepartmentId = catchAsync(async (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Employees fetched successfully",
-    totalEmployeesDepartment: employees.length,
+    totalEmployees: employees.length,
     employees,
   });
 });
 
 /* ===========================================================
-    🗑 DELETE EMPLOYEE (with user + auto dep delete)
+    🗑 DELETE EMPLOYEE (with user + auto-department cleanup)
 =========================================================== */
 export const deleteEmployee = catchAsync(async (req, res) => {
   const { message } = await deleteEmployeeService(req.params.id);

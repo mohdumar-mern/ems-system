@@ -18,16 +18,14 @@ const addEmployeeService = async ({
   department,
   salary,
   role,
-  created_by
+  created_by,
 }) => {
-
   // Check if email exists
-  const existingUser = await employeeRepository.findUserByEmail(email);
-  if (existingUser) {
+  if (await employeeRepository.findUserByEmail(email)) {
     throw new ApiError(400, "Email already in use");
   }
 
-  // Check department
+  // Check department exists
   const departmentDoc = await employeeRepository.findDepartmentByName(department);
   if (!departmentDoc) {
     throw new ApiError(400, `Department '${department}' not found`);
@@ -36,7 +34,7 @@ const addEmployeeService = async ({
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Create User
+  // Create user
   const user = await employeeRepository.createUser({
     name,
     email,
@@ -47,21 +45,18 @@ const addEmployeeService = async ({
   // Generate Employee ID
   const empId = `${user.name.replace(/\s+/g, "")}-${uuidv4().split("-")[0]}`;
 
-  // Convert DOB
-  const dobDate = dob ? new Date(dob) : null;
-
-  // Create Employee
+  // Create employee
   const employee = await employeeRepository.createEmployee({
     userId: user._id,
     emp_name: name,
     empId,
-    dob: dobDate,
+    dob: dob ? new Date(dob) : null,
     gender,
     maritalStatus,
     designation,
     department: departmentDoc._id,
     salary,
-    created_by
+    created_by,
   });
 
   return employee;
@@ -70,7 +65,7 @@ const addEmployeeService = async ({
 /* ===========================================================
     🟢 GET ALL EMPLOYEES (Pagination, Filtering)
 =========================================================== */
-const getEmployeeService = async ({ query, options }) => {
+const getEmployeeService = async ({ query = {}, options = {} }) => {
   const employees = await employeeRepository.getEmployees(query, options);
 
   if (!employees?.docs?.length) {
@@ -81,20 +76,16 @@ const getEmployeeService = async ({ query, options }) => {
 };
 
 /* ===========================================================
-    🟢 GET EMPLOYEE BY ID OR userId
+    🟢 GET EMPLOYEE BY ID OR USER ID
 =========================================================== */
 const getEmployeeByIdService = async (id) => {
-  // Try employee _id
   let employee = await employeeRepository.findByIdWithRelations(id);
 
-  // Try userId relation
   if (!employee) {
     employee = await employeeRepository.findByUserIdWithRelations(id);
   }
 
-  if (!employee) {
-    throw new ApiError(404, "Employee not found");
-  }
+  if (!employee) throw new ApiError(404, "Employee not found");
 
   return employee;
 };
@@ -105,14 +96,15 @@ const getEmployeeByIdService = async (id) => {
 const updateEmployeeService = async (id, data) => {
   const { name, maritalStatus, designation, department, salary, role } = data;
 
+  // Fetch employee
   const employee = await employeeRepository.findById(id);
   if (!employee) throw new ApiError(404, "Employee not found");
 
-  // Get associated user
+  // Fetch associated user
   const user = await employeeRepository.findUser(employee.userId);
   if (!user) throw new ApiError(404, "Associated user not found");
 
-  // Update User
+  // Update user
   if (name) user.name = name;
   if (role) user.role = role;
   await user.save();
@@ -122,7 +114,6 @@ const updateEmployeeService = async (id, data) => {
 
   // Department update
   let departmentId = employee.department;
-
   if (department) {
     const deptDoc = await employeeRepository.findDepartmentByName(department);
     if (!deptDoc) {
@@ -149,32 +140,28 @@ const updateEmployeeService = async (id, data) => {
 =========================================================== */
 const getEmployeeByDepartmentIdService = async (departmentId) => {
   const exists = await employeeRepository.departmentExists(departmentId);
-  if (!exists) {
-    throw new ApiError(404, "Department not found");
-  }
+  if (!exists) throw new ApiError(404, "Department not found");
 
   const employees = await employeeRepository.findEmployeesByDepartment(departmentId);
-  if (!employees.length) {
-    throw new ApiError(404, "No employees found in this department");
-  }
+  if (!employees.length) throw new ApiError(404, "No employees found in this department");
 
   return employees;
 };
 
 /* ===========================================================
-    🟢 DELETE EMPLOYEE + USER + AUTO-DELETE EMPTY DEPARTMENT
+    🟢 DELETE EMPLOYEE + USER + CLEANUP EMPTY DEPARTMENT
 =========================================================== */
 const deleteEmployeeService = async (id) => {
   const employee = await employeeRepository.findById(id);
   if (!employee) throw new ApiError(404, "Employee not found");
 
-  // Delete both records
+  // Delete user + employee
   await Promise.all([
     employeeRepository.deleteUser(employee.userId),
     employeeRepository.deleteEmployee(id),
   ]);
 
-  // Auto-delete department if empty
+  // Remove department if empty
   const remaining = await employeeRepository.findEmployeesByDepartment(employee.department);
   if (remaining.length === 0) {
     await employeeRepository.deleteDepartment(employee.department);
@@ -184,7 +171,7 @@ const deleteEmployeeService = async (id) => {
 };
 
 /* ===========================================================
-    Export
+    Export Services
 =========================================================== */
 export {
   addEmployeeService,
@@ -192,5 +179,5 @@ export {
   getEmployeeByIdService,
   updateEmployeeService,
   getEmployeeByDepartmentIdService,
-  deleteEmployeeService
+  deleteEmployeeService,
 };
