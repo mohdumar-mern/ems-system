@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto';
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || 'defaultaccesstokensecret';
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'defaultrefreshtokensecret';
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET ;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET ;
 
 
 export const generateAccessToken = (userId) => {

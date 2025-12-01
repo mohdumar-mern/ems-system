@@ -6,45 +6,34 @@ import expressAsyncHandler from "express-async-handler";
 
 dotenv.config();
 
-// Middleware to protect routes
-export const protect = expressAsyncHandler(async (req, res, next) => {
+// =============================
+// PROTECT MIDDLEWARE
+// =============================
+export const protect = async (req, res, next) => {
   try {
-  const token = req.headers.authorization?.startsWith("Bearer ")
-  ? req.headers.authorization.split(" ")[1]
-  : req.headers.authorization;
+    const header = req.headers['authorization'];
+    if (!header) return res.status(401).json({ message: 'No auth header' });
 
-
-    if (!token) {
-      return res
-        .status(401)
-        .json({ message: "No token provided", success: false });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded?.userId) {
-      return res.status(401).json({ message: "Invalid token", success: false });
-    }
-
-    const user = await User.findById(decoded.userId).select("-password");
-    if (!user) {
-      return res
-        .status(401)
-        .json({ message: "User not found", success: false });
-    }
-
-    req.user = user; // Attach user to request
+    const token = header.split(' ')[1];
+    const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(payload.userId).select('-refreshTokenHash');
+    if (!user) return res.status(401).json({ message: 'No user' });
+    req.user = user;
     next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized access", success: false });
-  }
-});
-
-// Role-based access
-export const adminOnly = (req, res, next) => {
-  if (req.user && req.user.role === "admin") {
-    next();
-  } else {
-    res.status(403).json({error : "Access denied, admin only"});
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid token' });
   }
 };
 
+// =============================
+// ADMIN-ONLY MIDDLEWARE
+// =============================
+export const adminOnly = (req, res, next) => {
+  if (req.user?.role === "admin") {
+    return next();
+  }
+
+  return res.status(403).json({
+    error: "Access denied, admin only",
+  });
+};

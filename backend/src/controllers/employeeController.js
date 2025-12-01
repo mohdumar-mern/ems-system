@@ -6,9 +6,10 @@ import Employee from "../models/employeeModel.js";
 import User from "../models/userModel.js";
 import Department from "../models/departmentModel.js";
 import { logError } from "../utils/logger.js";
+import { addEmployee, deleteEmployee, getEmployee, getEmployeeByDepartmentId, getEmployeeById, updateEmployee } from "../services/employeeServices.js";
 
 // ➕ Add new employee
-export const addEmployee = expressAsyncHandler(async (req, res, next) => {
+export const addEmployeeController = expressAsyncHandler(async (req, res, next) => {
   try {
     const {
       name,
@@ -23,51 +24,23 @@ export const addEmployee = expressAsyncHandler(async (req, res, next) => {
       role = "employee",
     } = req.body;
 
-    if (!req.file?.path && !req.file?.url) {
-      return res.status(400).json({ success: false, error: "No profile image uploaded" });
-    }
-
-    const [existingUser, departmentDoc] = await Promise.all([
-      User.findOne({ email }),
-      Department.findOne({ dep_name: department }),
-    ]);
-
-    if (existingUser) {
-      return res.status(400).json({ success: false, error: "Email already in use" });
-    }
-
-    if (!departmentDoc) {
-      return res.status(400).json({ success: false, error: `Department '${department}' not found` });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const fileUrl = req.file.path || req.file.url;
-    const public_id = req.file.public_id || req.file.filename || null;
-
-    const user = await new User({
+    const employee = await addEmployee({
       name,
       email,
-      password: hashedPassword,
-      role,
-      profile: { url: fileUrl, public_id },
-    }).save();
-
-    const empId = `${user.name.replace(/\s+/g, "")}-${uuidv4().split("-")[0]}`;
-    const dobDate = dob ? new Date(dob) : null;
-
-    const employee = await new Employee({
-      userId: user._id,
-      emp_name: user.name,
-      empId,
-      dob: dobDate,
+      password,
+      dob,
       gender,
       maritalStatus,
       designation,
-      department: departmentDoc._id,
+      department,
       salary,
+      role,
       created_by: req.user._id,
-    }).save();
+    });
 
+    // if (!req.file?.path && !req.file?.url) {
+    //   return res.status(400).json({ success: false, error: "No profile image uploaded" });
+    // }
     res.status(201).json({
       success: true,
       message: "Employee created successfully",
@@ -80,7 +53,7 @@ export const addEmployee = expressAsyncHandler(async (req, res, next) => {
 });
 
 // 📄 Get all employees
-export const getEmployee = expressAsyncHandler(async (req, res) => {
+export const getEmployeeController = expressAsyncHandler(async (req, res) => {
   const { page = 1, limit = 6, search = "" } = req.query;
 
   const options = {
@@ -108,11 +81,7 @@ export const getEmployee = expressAsyncHandler(async (req, res) => {
     ];
   }
 
-  const employees = await Employee.paginate(query, options);
-
-  if (!employees?.data?.length) {
-    return res.status(404).json({ success: false, message: "No employees found" });
-  }
+  const employees = await getEmployee({ query, options });
 
   res.status(200).json({
     success: true,
@@ -122,21 +91,8 @@ export const getEmployee = expressAsyncHandler(async (req, res) => {
 });
 
 // 🔍 Get employee by ID
-export const getEmployeeById = expressAsyncHandler(async (req, res) => {
-  const { id } = req.params;
-  let employee = await Employee.findById(id)
-    .populate("userId", "_id name email profile role")
-    .populate("department", "_id dep_name");
-
-  if (!employee) {
-    employee = await Employee.findOne({ userId: id })
-      .populate("userId", "_id name email profile role")
-      .populate("department", "_id dep_name");
-  }
-
-  if (!employee) {
-    return res.status(404).json({ success: false, message: "Employee not found" });
-  }
+export const getEmployeeByIdController = expressAsyncHandler(async (req, res) => {
+  const employee = await getEmployeeById(req.params.id);
 
   res.status(200).json({
     success: true,
@@ -146,43 +102,17 @@ export const getEmployeeById = expressAsyncHandler(async (req, res) => {
 });
 
 // ✏️ Update employee
-export const updateEmployee = expressAsyncHandler(async (req, res) => {
+export const updateEmployeeController = expressAsyncHandler(async (req, res) => {
   const { name, maritalStatus, designation, department, salary, role } = req.body;
   const { id } = req.params;
-
-  const employee = await Employee.findById(id);
-  if (!employee) return res.status(404).json({ success: false, message: "Employee not found" });
-
-  const user = await User.findById(employee.userId);
-  if (!user) return res.status(404).json({ success: false, message: "Associated user not found" });
-
-  user.name = name || user.name;
-  user.role = role || user.role;
-  await user.save();
-
-  const empId = `${user.name.replace(/\s+/g, "")}-${uuidv4().split("-")[0]}`;
-
-  let deptId = department;
-  if (department && isNaN(department)) {
-    const deptDoc = await Department.findOne({ dep_name: department });
-    if (!deptDoc) {
-      return res.status(400).json({ success: false, message: `Department '${department}' not found` });
-    }
-    deptId = deptDoc._id;
-  }
-
-  const updatedEmployee = await Employee.findByIdAndUpdate(
-    id,
-    {
-      emp_name: user.name,
-      empId,
-      maritalStatus: maritalStatus || employee.maritalStatus,
-      designation: designation || employee.designation,
-      department: deptId || employee.department,
-      salary: salary || employee.salary,
-    },
-    { new: true, runValidators: true }
-  );
+  const updatedEmployee = await updateEmployee(id, {
+    name,
+    maritalStatus,
+    designation,
+    department,
+    salary,
+    role,
+  });
 
   res.status(200).json({
     success: true,
@@ -192,19 +122,8 @@ export const updateEmployee = expressAsyncHandler(async (req, res) => {
 });
 
 // 🏢 Get Employees by Department
-export const getEmployeeByDepartmentId = expressAsyncHandler(async (req, res) => {
-  const departmentId = req.params.id;
-
-  const exists = await Department.exists({ _id: departmentId });
-  if (!exists) {
-    return res.status(404).json({ success: false, message: "Department not found" });
-  }
-
-  const employees = await Employee.find({ department: departmentId }).select("emp_name empId");
-  if (!employees.length) {
-    return res.status(404).json({ success: false, message: "No employees found for this department" });
-  }
-
+export const getEmployeeByDepartmentIdController = expressAsyncHandler(async (req, res) => {
+  const employees = await getEmployeeByDepartmentId(req.params.id);
   res.status(200).json({
     success: true,
     message: "Employees fetched successfully",
@@ -214,26 +133,12 @@ export const getEmployeeByDepartmentId = expressAsyncHandler(async (req, res) =>
 });
 
 // 🗑️ Delete employee
-export const deleteEmployee = expressAsyncHandler(async (req, res) => {
-  const { id } = req.params;
+export const deleteEmployeeController = expressAsyncHandler(async (req, res) => {
 
-  const employee = await Employee.findById(id);
-  if (!employee) {
-    return res.status(404).json({ success: false, message: "Employee not found" });
-  }
-
-  await Promise.all([
-    User.findByIdAndDelete(employee.userId),
-    Employee.findByIdAndDelete(id),
-  ]);
-
-  const remaining = await Employee.find({ department: employee.department });
-  if (remaining.length === 0) {
-    await Department.findByIdAndDelete(employee.department);
-  }
+  const { success, message } = await deleteEmployee(req.params.id);
 
   res.status(200).json({
-    success: true,
-    message: "Employee and associated user deleted successfully",
+    success: success,
+    message: message,
   });
 });

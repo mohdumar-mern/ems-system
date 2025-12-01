@@ -35,6 +35,7 @@ export const loginController = expressAsyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const { user, refreshToken, accessToken } = await login({ email, password });
     res.cookie('refreshToken', refreshToken, COOKIE_OPTIONS);
+    res.cookie('accessToken', accessToken, COOKIE_OPTIONS);
     res.status(200).json({ success: true, user, accessToken });
    
 

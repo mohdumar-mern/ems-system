@@ -97,6 +97,7 @@ const AddEmployee = () => {
     });
 
     try {
+      console.log(formData)
       await addEmployee(payload).unwrap();
       toast.success("Employee added successfully!");
       navigate(-1); // go back to list
