@@ -3,6 +3,8 @@ import Department from "../models/departmentModel.js";
 import Employee from "../models/employeeModel.js";
 import User from "../models/userModel.js";
 import { v4 as uuidv4 } from "uuid";
+import { getEmployees } from "../repositories/employeeRepo.js";
+import ApiError from "../utils/ApiError.js";
 
 
 const addEmployee = async ({
@@ -65,15 +67,17 @@ const addEmployee = async ({
   return employee;
 }
 
-const getEmployee = async ({ query = {}, options = {} }) => {
-  const employees = await Employee.paginate(query, options);
+const getEmployee = async ({ query, options }) => {
+  const employees = await getEmployees(query, options);
+  console.log("employee", employees)
 
   if (!employees?.data?.length) {
-    return res.status(404).json({ success: false, message: "No employees found" });
+    throw new ApiError(404, "No employees found");
   }
-  return employees;
 
-}
+  return employees;
+};
+
 
 const getEmployeeById = async (id) => {
   const employee = await Employee.findById(id)

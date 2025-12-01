@@ -11,7 +11,7 @@ import {
 } from "../controllers/adminController.js";
 
 import { upload } from "../middlewares/multerMiddleware.js";
-import { loginLimiter, registerLimiter } from "../middlewares/rateLimiter.js";
+import { loginLimiter, registerLimiter } from "../config/rateLimiter.js";
 
 /**
  * @swagger

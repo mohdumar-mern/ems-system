@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 
 import { forgotPassword, loginController, logout, registerController } from '../controllers/userController.js';
-import { loginLimiter, registerLimiter } from '../middlewares/rateLimiter.js';
+import { loginLimiter, registerLimiter } from '../config/rateLimiter.js';
 
 /**
  * @swagger

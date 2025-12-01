@@ -1,12 +1,8 @@
 import expressAsyncHandler from "express-async-handler";
-import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
 
-import Employee from "../models/employeeModel.js";
-import User from "../models/userModel.js";
-import Department from "../models/departmentModel.js";
-import { logError } from "../utils/logger.js";
 import { addEmployee, deleteEmployee, getEmployee, getEmployeeByDepartmentId, getEmployeeById, updateEmployee } from "../services/employeeServices.js";
+import ApiResponse from "../utils/apiResponse.js";
+import catchAsync from "../utils/catchAsync.js";
 
 // ➕ Add new employee
 export const addEmployeeController = expressAsyncHandler(async (req, res, next) => {
@@ -47,18 +43,17 @@ export const addEmployeeController = expressAsyncHandler(async (req, res, next) 
       employee,
     });
   } catch (error) {
-    logError(error, "Add Employee");
     next(error); // Pass error to express-async-handler/global error handler
   }
 });
 
 // 📄 Get all employees
-export const getEmployeeController = expressAsyncHandler(async (req, res) => {
+export const getEmployeeController = catchAsync(async (req, res) => {
   const { page = 1, limit = 6, search = "" } = req.query;
 
   const options = {
-    page: +page,
-    limit: +limit,
+    page: Number(page),
+    limit: Number(limit),
     lean: true,
     populate: [
       { path: "userId", select: "_id name email profile" },
@@ -69,8 +64,10 @@ export const getEmployeeController = expressAsyncHandler(async (req, res) => {
   };
 
   const query = {};
-  if (search?.trim()) {
+
+  if (search.trim()) {
     const regex = new RegExp(search.trim(), "i");
+
     query.$or = [
       { emp_name: regex },
       { empId: regex },
@@ -82,13 +79,14 @@ export const getEmployeeController = expressAsyncHandler(async (req, res) => {
   }
 
   const employees = await getEmployee({ query, options });
+  console.log("employee", employees)
 
-  res.status(200).json({
-    success: true,
-    message: "Employees fetched successfully",
-    ...employees,
-  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, employees, "Employees fetched successfully"));
 });
+
 
 // 🔍 Get employee by ID
 export const getEmployeeByIdController = expressAsyncHandler(async (req, res) => {

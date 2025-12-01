@@ -4,21 +4,20 @@ import cors from "cors";
 import morgan from "morgan";
 import compression from "compression";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import hpp from "hpp";
-import xss from "xss-clean";
+
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
-import fs from "fs";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./utils/swaggerSpec.js";
-import logger from "./utils/logger.js";
+import mongoSanitize from "express-mongo-sanitize";
+
 
 
 // console.log("Files in routes folder:", fs.readdirSync("./routes"));
 
 // Routes
+import routes from "./routes/index.js";
 import adminRoutes from "./routes/adminRoute.js";
 import userRoutes from "./routes/userRoute.js";
 import departmentRoutes from "./routes/departmentRoute.js";
@@ -26,83 +25,47 @@ import employeeRoutes from "./routes/employeeRoute.js";
 import salaryRoutes from "./routes/salaryRoute.js";
 import summaryRoutes from "./routes/summaryRoutes.js";
 import leaveRoutes from "./routes/leaveRoute.js";
-import { globalLimiter } from "./middlewares/rateLimiter.js";
 import { keepAlive } from "./utils/keepAlive.js";
+import errorHandler from "./middlewares/errorHandler.js";
+import corsOptions from "./config/corsOptions.js";
+import { apiLimiter } from "./config/rateLimiter.js";
+import sanitize from "./middlewares/sanitize.js";
+import notFound from "./middlewares/notFound.js";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // Enable __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Content Security Policy
+
+// Security
+app.use(helmet());
+app.use(cors(corsOptions));
+app.use(apiLimiter);
+
+
+/// Body parsers
+app.use(cookieParser());
+app.use(express.json({ limit: "20kb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// ⭐ FIX FOR EXPRESS 5 → CUSTOM MONGO SANITIZE
 app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data: https://res.cloudinary.com;"
-  );
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  // IMPORTANT: DO NOT SANITIZE req.query (Express 5 getter-only)
   next();
 });
 
-// ✅ Security Headers
-app.use(
-  helmet.contentSecurityPolicy({
-    directives: {
-      defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https://res.cloudinary.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      connectSrc: ["'self'", process.env.FRONTEND_URL || "http://localhost:5173", "https://res.cloudinary.com"],
-    },
-  })
-);
+// XSS Clean
 
-// ✅ Other Security Middlewares
-app.use(globalLimiter);
-// app.use(mongoSanitize());
-// app.use(xss());
-// app.use(hpp());
-
-// ✅ CORS
-const allowedOrigins = [
-  "http://localhost:5173", // local dev frontend
-  "https://ems-system-psi.vercel.app", // deployed frontend
-  process.env.FRONTEND_URL,
-];
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    optionsSuccessStatus: 200,
-  })
-);
-
-// ✅ Parsing
-app.use(cookieParser());
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true }));
-
-// ✅ Logging
-const accessLogStream = fs.createWriteStream(path.join("logs", "access.log"), {
-  flags: "a",
-});
-app.use(morgan("combined", { stream: accessLogStream }));
-if (process.env.NODE_ENV !== "production") {
-  app.use(morgan("dev"));
-}
-
-// ✅ Compression
+// Logging
+app.use(morgan("dev"));
+// Compression
 app.use(compression());
+
 
 // ✅ Swagger API Docs
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -113,31 +76,20 @@ app.get("/health", (req, res) => {
 });
 
 // API Routes
-app.use("/api/admin", adminRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/departments", departmentRoutes);
+// app.use("/api/admin", adminRoutes);
+// app.use("/api/user", userRoutes);
+// app.use("/api/departments", departmentRoutes);
 app.use("/api/employee", employeeRoutes);
-app.use("/api/salary", salaryRoutes);
-app.use("/api/leaves", leaveRoutes);
-app.use("/api/dashboard", summaryRoutes);
+app.use("/api", routes);
+// app.use("/api/salary", salaryRoutes);
+// app.use("/api/leaves", leaveRoutes);
+// app.use("/api/dashboard", summaryRoutes);
 
-// 404 Fallback
-app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
-});
+// 404
+app.use(notFound);
 
-// Global Error Handler
-app.use((err, req, res, next) => {
-  logger.error(err.stack || err.message);
-  res.status(500).json({
-    success: false,
-    message: "Internal Server Error",
-  });
-});
-
+// Global error handler
+app.use(errorHandler);
 
 export default app
 
