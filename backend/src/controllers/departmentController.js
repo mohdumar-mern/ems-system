@@ -1,78 +1,82 @@
 import expressAsyncHandler from "express-async-handler";
 
 import { 
-  addDepartment, 
-  deleteDepartment, 
-  getDepartmentById, 
-  getDepartments, 
-  getDepartmentsName, 
-  updateDepartment 
+  addDepartmentService, 
+  deleteDepartmentService, 
+  getDepartmentByIdService, 
+  getDepartmentsService, 
+  getDepartmentsNameService, 
+  updateDepartmentService 
 }  from "../services/departmentServices.js";
+import catchAsync from "../utils/catchAsync.js";
+import ApiResponse from "../utils/apiResponse.js";
 
 // ✅ Add Department
-export const addDepartmentController = expressAsyncHandler(async (req, res) => {
+export const addDepartment = catchAsync(async (req, res) => {
   const { dep_name, description } = req.body;
 
-  const result = await addDepartment({ dep_name, description, created_by: req.user._id })
-  res.status(201).json({
-    success: true,
-    message: "Department added successfully",
-    department: result,
-  });
+  const result = await addDepartmentService({ dep_name, description, created_by: req.user._id })
+  return res.
+    status(201).json(new ApiResponse(201, result, "Department created successfully" ));
+  
 });
 
 // ✅ Get All Departments with Search & Pagination
-export const getDepartmentsController = expressAsyncHandler(async (req, res) => {
+export const getDepartments = catchAsync(async (req, res) => {
   const { page = 1, limit = 6, search = "" } = req.query;
-  const regex = new RegExp(search.trim(), "i");
-  const result = await getDepartments({ page, limit, search, regex });
 
-  res.status(200).json({
-    success: true,
-    message: "Departments fetched successfully",
-    ...result,
-  });
+  const regex = new RegExp(search.trim(), "i");
+
+  const query = {
+    is_deleted: false,
+    ...(search && {
+      $or: [{ dep_name: regex }, { description: regex }],
+    }),
+  };
+
+  const options = {
+    page: Number(page),
+    limit: Number(limit),
+    lean: true,
+    sort: { createdAt: -1 },
+    populate: {
+      path: "created_by",
+      select: "name email",
+    },
+  };
+
+  const result = await getDepartmentsService(query, options);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "Departments fetched successfully"));
 });
 
-// ✅ Get Department by ID
-export const getDepartmentByIdController = expressAsyncHandler(async (req, res) => {
-  const department = await getDepartmentById(req.params.id);
 
-  res.status(200).json({
-    success: true,
-    message: "Department retrieved successfully",
-    department,
-  });
+// ✅ Get Department by ID
+export const getDepartmentById = expressAsyncHandler(async (req, res) => {
+  const department = await getDepartmentByIdService(req.params.id);
+
+  return res.status(200).json(new ApiResponse(200, department, "Department fetched successfully"));
 });
 
 // ✅ Update Department
-export const updateDepartmentController = expressAsyncHandler(async (req, res) => {
+export const updateDepartment = expressAsyncHandler(async (req, res) => {
   const { dep_name, description } = req.body;
-  const updated = await updateDepartment(req.params.id, { dep_name, description });
+  const updated = await updateDepartmentService(req.params.id, { dep_name, description });
 
-  res.status(200).json({
-    success: true,
-    message: "Department updated successfully",
-    department: updated,
-  });
+  res.status(200).json(new ApiResponse(200, updated, "Department updated successfully"));
 });
 
 // ✅ Soft Delete Department and Related Data
-export const deleteDepartmentController = expressAsyncHandler(async (req, res) => {
-  await deleteDepartment(req.params.id, { userId: req.user._id });
-  res.status(200).json({
-    success: true,
-    message: "Department and related data deleted successfully",
-  });
+export const deleteDepartment = expressAsyncHandler(async (req, res) => {
+  await deleteDepartmentService(req.params.id, { userId: req.user._id });
+  res.status(200).json(new ApiResponse(200, null, "Department deleted successfully"));
 });
 
 // ✅ Get All Department Names and IDs
-export const getDepartmentsNameController = expressAsyncHandler(async (req, res) => {
-  const departments = await getDepartmentsName();
+export const getDepartmentsName = expressAsyncHandler(async (req, res) => {
+  const departments = await getDepartmentsNameService();
 
-  res.status(200).json({
-    success: true,
-    message: "Departments fetched successfully",
-    departments,
-  });
+  res.status(200).json(new ApiResponse(200, departments, "Department names fetched successfully"));
 });

@@ -78,7 +78,6 @@ app.get("/health", (req, res) => {
 // API Routes
 // app.use("/api/admin", adminRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/departments", departmentRoutes);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/v1", routes);
 // app.use("/api/salary", salaryRoutes);

@@ -45,6 +45,10 @@ export const employeeRepository = {
   async findEmployeesByDepartment(id) {
     return Employee.find({ department: id }).select("emp_name empId");
   },
+  // Delete all employees of department
+  async deleteManyByDepartment(deptId) {
+    return Employee.deleteMany({ department: deptId });
+  },
 
   /* ----------------------------------------------------
    * 👤 EMPLOYEE METHODS
