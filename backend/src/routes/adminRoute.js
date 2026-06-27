@@ -10,7 +10,7 @@ import {
   adminForgotPassword
 } from "../controllers/adminController.js";
 
-import { upload } from "../middlewares/multerMiddleware.js";
+// import { upload } from "../middlewares/multerMiddleware.js";
 import { loginLimiter, registerLimiter } from "../config/rateLimiter.js";
 
 /**
@@ -68,7 +68,8 @@ router.get("/profile", protect, getAdminProfile);
  *       400:
  *         description: Validation error or email already in use
  */
-router.post("/register", upload.single("profile"), registerLimiter, adminRegister);
+// router.post("/register", upload.single("profile"), registerLimiter, adminRegister);
+router.post("/register", registerLimiter, adminRegister);
 
 /**
  * @swagger

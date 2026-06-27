@@ -13,20 +13,20 @@ export const adminRegister = expressAsyncHandler(async (req, res) => {
     return res.status(400).json({ success: false, error: "Email already in use" });
   }
 
-  if (!req.file) {
-    return res.status(400).json({ success: false, error: "No profile image uploaded" });
-  }
+  // if (!req.file) {
+  //   return res.status(400).json({ success: false, error: "No profile image uploaded" });
+  // }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const fileUrl = req.file?.path || req.file?.url || "";
-  const public_id = req.file?.public_id || req.file?.filename || "";
+  // const fileUrl = req.file?.path || req.file?.url || "";
+  // const public_id = req.file?.public_id || req.file?.filename || "";
 
   const user = new User({
     name,
     email,
     password: hashedPassword,
     role: role || "admin",
-    profile: { url: fileUrl, public_id },
+    // profile: { url: fileUrl, public_id },
   });
 
   const savedUser = await user.save();
@@ -40,7 +40,7 @@ export const adminRegister = expressAsyncHandler(async (req, res) => {
       name: savedUser.name,
       email: savedUser.email,
       role: savedUser.role,
-      profile: savedUser.profile,
+      // profile: savedUser.profile,
     },
   });
 });

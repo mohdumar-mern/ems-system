@@ -11,7 +11,7 @@ import {
 } from "../controllers/employeeController.js";
 
 import { protect, adminOnly } from "../middlewares/authMiddleware.js";
-import { upload } from "../middlewares/multerMiddleware.js";
+// import { upload } from "../middlewares/multerMiddleware.js";
 
 /**
  * @swagger
