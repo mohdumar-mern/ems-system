@@ -1,7 +1,6 @@
 const corsOptions = {
   origin: (origin, callback) => {
     const allowedOrigins = [
-      "http://localhost:5173", // local dev frontend
       process.env.FRONTEND_URL,
     ];
 
